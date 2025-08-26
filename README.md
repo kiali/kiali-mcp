@@ -91,6 +91,21 @@ Base URL: `http://localhost:8080`
 - `POST /v1/admin/clean` → `{ "removed_documents": 42 }`
 - `POST /v1/admin/deduplicate` → `{ "removed_duplicates": 3 }`
 
+- `GET /v1/tools/graph`
+  - Fetches Kiali graph JSON from your internal Kiali API and analyzes it via the chat engine with a specialized prompt.
+  - Configure in `config.yaml` or env:
+    ```yaml
+    kiali_api_base: "https://kiali-istio-system.apps-crc.testing"
+    kiali_bearer_token: "...optional..."
+    # For self-signed Kiali certs:
+    kiali_tls_insecure: true           # or supply a CA bundle
+    # kiali_ca_file: "/path/to/ca.pem"
+    ```
+  - Example request (parameters forwarded to Kiali API `/api/namespaces/graph`):
+    ```bash
+    curl $AUTH "http://localhost:8080/v1/tools/graph?duration=60s&graphType=versionedApp&includeIdleEdges=false&injectServiceNodes=true&boxBy=cluster,namespace,app&ambientTraffic=none&appenders=deadNode,istio,serviceEntry,meshCheck,workloadEntry,health,idleNode&rateGrpc=requests&rateHttp=requests&rateTcp=sent&namespaces=bookinfo"
+    ```
+
 ## Common workflows
 
 ### 1) Ingest docs, then chat

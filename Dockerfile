@@ -10,8 +10,13 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /out/server ./cmd/server
 
 FROM gcr.io/distroless/base-debian12:nonroot
+ARG VCS_REF=""
+ARG BUILD_DATE=""
 WORKDIR /
 COPY --from=build /out/server /server
+# OCI labels to carry build metadata
+LABEL org.opencontainers.image.revision=$VCS_REF \
+      org.opencontainers.image.created=$BUILD_DATE
 # Use numeric UID/GID for OpenShift compatibility
 USER 65532:65532
 ENV SERVER_ADDR=:8080

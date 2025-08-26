@@ -62,6 +62,18 @@ parameters:
   - name: ROUTE_HOST
     description: Optional route host (leave empty for auto)
     value: ""
+  - name: KIALI_API_BASE
+    description: Base URL for internal Kiali API (e.g., https://kiali.istio-system:20001)
+    value: ""
+  - name: KIALI_BEARER_TOKEN
+    description: Optional bearer token for Kiali API
+    value: ""
+  - name: KIALI_TLS_INSECURE
+    description: Set true to skip TLS verification for Kiali API
+    value: "false"
+  - name: KIALI_CA_FILE
+    description: Optional path to mounted CA bundle file (inside container)
+    value: ""
 objects:
   - apiVersion: v1
     kind: PersistentVolumeClaim
@@ -133,6 +145,14 @@ objects:
                   value: ${BASIC_AUTH_USER}
                 - name: BASIC_AUTH_PASS
                   value: ${BASIC_AUTH_PASS}
+                - name: KIALI_API_BASE
+                  value: ${KIALI_API_BASE}
+                - name: KIALI_BEARER_TOKEN
+                  value: ${KIALI_BEARER_TOKEN}
+                - name: KIALI_TLS_INSECURE
+                  value: ${KIALI_TLS_INSECURE}
+                - name: KIALI_CA_FILE
+                  value: ${KIALI_CA_FILE}
               readinessProbe:
                 httpGet:
                   path: /healthz

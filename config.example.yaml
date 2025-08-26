@@ -31,3 +31,13 @@ server_addr: ":8080"
 
 # Timeouts
 server_timeout_seconds: 60
+
+# External graph service (for /v1/tools/graph)
+# graph_service_url: "https://kiali.example.com/kiali/api/namespaces/graph"  # required to enable
+# graph_bearer_token: ""  # optional bearer token for upstream
+
+# Internal Kiali API (graph analysis tool)
+# kiali_api_base: "https://kiali-istio-system.apps-crc.testing"  # required for /v1/tools/graph
+# kiali_bearer_token: ""  # optional
+# kiali_tls_insecure: false  # set true to skip TLS verification (self-signed)
+# kiali_ca_file: "/path/to/ca.pem"  # optional custom CA bundle

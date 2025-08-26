@@ -23,6 +23,12 @@ SERVER_ADDR ?= :8080
 ROUTE_HOST ?=
 CONFIG_FILE ?=
 
+# Kiali graph tool configuration
+KIALI_API_BASE ?=
+KIALI_BEARER_TOKEN ?=
+KIALI_TLS_INSECURE ?= false
+KIALI_CA_FILE ?=
+
 # Paths
 DEPLOY_TEMPLATE := deploy/openshift-template.yaml
 
@@ -49,13 +55,20 @@ run:
 	BASIC_AUTH_PASS=$(BASIC_AUTH_PASS) \
 	SERVER_ADDR=$(SERVER_ADDR) \
 	CONFIG_FILE=$(CONFIG_FILE) \
+	KIALI_API_BASE=$(KIALI_API_BASE) \
+	KIALI_BEARER_TOKEN=$(KIALI_BEARER_TOKEN) \
+	KIALI_TLS_INSECURE=$(KIALI_TLS_INSECURE) \
+	KIALI_CA_FILE=$(KIALI_CA_FILE) \
 	go run ./cmd/server
 
 # Container
 container: container-build
 
 container-build:
-	podman build -t $(IMAGE) -f Dockerfile .
+	podman build \
+	  --build-arg VCS_REF=$$(git rev-parse --short=12 HEAD 2>/dev/null || echo unknown) \
+	  --build-arg BUILD_DATE=$$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
+	  -t $(IMAGE) -f Dockerfile .
 
 container-push:
 	podman push $(IMAGE)
@@ -86,6 +99,10 @@ openshift-deploy:
 		-p DB_PASS=$(DB_PASS) \
 		-p SERVER_ADDR=$(SERVER_ADDR) \
 		-p ROUTE_HOST=$(ROUTE_HOST) \
+		-p KIALI_API_BASE=$(KIALI_API_BASE) \
+		-p KIALI_BEARER_TOKEN=$(KIALI_BEARER_TOKEN) \
+		-p KIALI_TLS_INSECURE=$(KIALI_TLS_INSECURE) \
+		-p KIALI_CA_FILE=$(KIALI_CA_FILE) \
 		| oc -n $(NAMESPACE) apply -f -
 	@echo -n "Route: https://" ; oc -n $(NAMESPACE) get route $(NAME) -o jsonpath='{.spec.host}{"\n"}'
 
