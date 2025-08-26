@@ -1,0 +1,33 @@
+# Copy this file to config.yaml and adjust values as needed.
+
+# LLM provider: gemini or openai
+llm_provider: gemini
+
+# Models (leave empty to use provider defaults)
+completion_model: gemini-1.5-flash
+embedding_model: text-embedding-004
+
+# Keys (set at least one based on provider)
+# gemini_api_key: "AIza..."
+# openai_api_key: "sk-..."
+
+# Vector storage
+vector_backend: sqlite            # sqlite or postgres
+vector_db_path: ./data/rag.sqlite # only for sqlite
+
+# Postgres connection (when vector_backend=postgres)
+# db_host: /cloudsql/PROJECT:REGION:INSTANCE
+# db_name: kiali_ai
+# db_user: kiali_ai
+# db_pass: StrongPass!
+# embedding_dim: 1536
+
+# HTTP basic auth (optional)
+basic_auth_user: kiali
+basic_auth_pass: developer
+
+# Server
+server_addr: ":8080"
+
+# Timeouts
+server_timeout_seconds: 60

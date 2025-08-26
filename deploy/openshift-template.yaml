@@ -1,0 +1,183 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: ${NAME}
+  annotations:
+    description: Kiali AI MCP - RAG service (SQLite or Postgres)
+parameters:
+  - name: NAME
+    description: Application name
+    value: kiali-ai-mcp
+  - name: IMAGE
+    description: Container image (registry path)
+    value: ""
+  - name: REPLICAS
+    description: Number of replicas
+    value: "1"
+  - name: VECTOR_BACKEND
+    description: sqlite or postgres
+    value: sqlite
+  - name: VECTOR_DB_PATH
+    description: Path to SQLite DB file (when VECTOR_BACKEND=sqlite)
+    value: /data/rag.sqlite
+  - name: PVC_SIZE
+    description: Size of PVC for SQLite
+    value: 1Gi
+  - name: LLM_PROVIDER
+    description: gemini or openai
+    value: gemini
+  - name: GEMINI_API_KEY
+    description: Gemini API key (optional if using OpenAI)
+    value: ""
+  - name: OPENAI_API_KEY
+    description: OpenAI API key (optional if using Gemini)
+    value: ""
+  - name: COMPLETION_MODEL
+    description: Optional override completion model
+    value: ""
+  - name: EMBEDDING_MODEL
+    description: Optional override embedding model
+    value: ""
+  - name: EMBEDDING_DIM
+    description: Embedding vector dimension (e.g., 1536)
+    value: "1536"
+  - name: BASIC_AUTH_USER
+    value: kiali
+  - name: BASIC_AUTH_PASS
+    value: developer
+  - name: DB_HOST
+    description: Postgres host or Cloud SQL socket dir
+    value: ""
+  - name: DB_NAME
+    description: Postgres database name
+    value: ""
+  - name: DB_USER
+    description: Postgres user
+    value: ""
+  - name: DB_PASS
+    description: Postgres password
+    value: ""
+  - name: SERVER_ADDR
+    value: ":8080"
+  - name: ROUTE_HOST
+    description: Optional route host (leave empty for auto)
+    value: ""
+objects:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: ${NAME}-data
+      labels:
+        app: ${NAME}
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: ${PVC_SIZE}
+  - apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: ${NAME}
+      labels:
+        app: ${NAME}
+    spec:
+      replicas: ${{REPLICAS}}
+      selector:
+        matchLabels:
+          app: ${NAME}
+      template:
+        metadata:
+          labels:
+            app: ${NAME}
+        spec:
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+            fsGroup: 2000
+          containers:
+            - name: server
+              image: ${IMAGE}
+              imagePullPolicy: IfNotPresent
+              ports:
+                - containerPort: 8080
+                  name: http
+              env:
+                - name: SERVER_ADDR
+                  value: ${SERVER_ADDR}
+                - name: LLM_PROVIDER
+                  value: ${LLM_PROVIDER}
+                - name: GEMINI_API_KEY
+                  value: ${GEMINI_API_KEY}
+                - name: OPENAI_API_KEY
+                  value: ${OPENAI_API_KEY}
+                - name: COMPLETION_MODEL
+                  value: ${COMPLETION_MODEL}
+                - name: EMBEDDING_MODEL
+                  value: ${EMBEDDING_MODEL}
+                - name: EMBEDDING_DIM
+                  value: ${EMBEDDING_DIM}
+                - name: VECTOR_BACKEND
+                  value: ${VECTOR_BACKEND}
+                - name: VECTOR_DB_PATH
+                  value: ${VECTOR_DB_PATH}
+                - name: DB_HOST
+                  value: ${DB_HOST}
+                - name: DB_NAME
+                  value: ${DB_NAME}
+                - name: DB_USER
+                  value: ${DB_USER}
+                - name: DB_PASS
+                  value: ${DB_PASS}
+                - name: BASIC_AUTH_USER
+                  value: ${BASIC_AUTH_USER}
+                - name: BASIC_AUTH_PASS
+                  value: ${BASIC_AUTH_PASS}
+              readinessProbe:
+                httpGet:
+                  path: /healthz
+                  port: 8080
+                initialDelaySeconds: 5
+                periodSeconds: 10
+              livenessProbe:
+                httpGet:
+                  path: /healthz
+                  port: 8080
+                initialDelaySeconds: 10
+                periodSeconds: 20
+              volumeMounts:
+                - name: data
+                  mountPath: /data
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: ${NAME}-data
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      name: ${NAME}
+      labels:
+        app: ${NAME}
+    spec:
+      selector:
+        app: ${NAME}
+      ports:
+        - name: http
+          port: 8080
+          targetPort: 8080
+  - apiVersion: route.openshift.io/v1
+    kind: Route
+    metadata:
+      name: ${NAME}
+      labels:
+        app: ${NAME}
+    spec:
+      host: ${ROUTE_HOST}
+      to:
+        kind: Service
+        name: ${NAME}
+      port:
+        targetPort: http
+      tls:
+        termination: edge
+        insecureEdgeTerminationPolicy: Redirect
