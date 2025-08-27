@@ -43,8 +43,7 @@ func NewRouter() http.Handler {
 	r.Post("/v1/admin/clean", CleanHandler)
 	r.Post("/v1/admin/deduplicate", DeduplicateHandler)
 
-	// Tools
-	r.Get("/v1/tools/graph", GraphToolHandler)
+	// Tools (none currently)
 
 	return r
 }
