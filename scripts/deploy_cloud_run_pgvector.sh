@@ -14,7 +14,7 @@ set -euo pipefail
 : "${EMBEDDING_DIM:=768}" # Gemini text-embedding-004 returns 768-dim
 
 
-#GEMINI KEY AIzaSyBIwSxvDWZL-4eRAPA91SO7cWhgw0ZeDkQ
+#GEMINI KEY
 
 SQL_CONN_NAME="$PROJECT_ID:$REGION:$INSTANCE"
 IMAGE="$REGION-docker.pkg.dev/$PROJECT_ID/$AR_REPO/$SERVICE:latest"
