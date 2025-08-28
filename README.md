@@ -16,6 +16,12 @@ RAG-backed chatbot service for Kiali/Istio. Ingests `kiali.io` docs and YouTube 
   - OpenAI: completion `gpt-4o-mini`, embeddings `text-embedding-3-small`.
 - Override via `COMPLETION_MODEL` and `EMBEDDING_MODEL`. If you change embeddings, set `EMBEDDING_DIM` accordingly (e.g., 1536).
 
+## Demo videos
+
+[![Check graph demo](./images/video_check_graph.png)](https://www.youtube.com/watch?v=4eWgJW4gA8I)
+
+[![Ask fault injection demo](./images/video_ask_fault_injection.png)](https://www.youtube.com/watch?v=OfvVKf4U42Q)
+
 ## Quickstart (local, SQLite)
 ```bash
 # From repo root
