@@ -18,8 +18,10 @@ RAG-backed chatbot service for Kiali/Istio. Ingests `kiali.io` docs and YouTube 
 
 ## Demo videos
 
+### Check my graph 
 [![Check graph demo](./images/video_check_graph.png)](https://www.youtube.com/watch?v=4eWgJW4gA8I)
 
+### What is a fault injection?
 [![Ask fault injection demo](./images/video_ask_fault_injection.png)](https://www.youtube.com/watch?v=OfvVKf4U42Q)
 
 ## Quickstart (local, SQLite)
